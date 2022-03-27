@@ -7,8 +7,7 @@ import aiohttp
 
 from space_traders.client.client import Client
 from space_traders.client.request_factory import RequestFactory
-
-BASE_URL = 'https://api.spacetraders.io'
+from space_traders.config import BASE_URL
 
 
 async def main():
@@ -29,7 +28,7 @@ async def main():
         client = Client(request_factory)
 
         r = await asyncio.gather(
-            client.get_status(),
+            client.get_game_status(),
             client.get_account_info(),
             client.get_loans(),
             client.take_loan('STARTUP')

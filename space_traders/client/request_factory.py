@@ -11,10 +11,11 @@ class RequestFactory:
         self,
         session: aiohttp.ClientSession
     ):
-        self.session = session
-        self.methods = {
-            'get': self.session.get,
-            'post': self.session.post,
+        self.__methods = {
+            'GET': session.get,
+            'POST': session.post,
+            'PUT': session.put,
+            'DELETE': session.delete,
         }
 
     async def generate(
@@ -25,7 +26,7 @@ class RequestFactory:
     ):
         if not params:
             params = {}
-        async with self.methods[method](endpoint, params=params) as response:
+        async with self.__methods[method](endpoint, params=params) as response:
             return {
                 'status_code': response.status,
                 'response': await response.json()

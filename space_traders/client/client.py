@@ -1,66 +1,253 @@
-import asyncio
 from typing import (
     Dict,
+    Optional,
     Union,
 )
-
-import aiohttp
 
 from space_traders.client.request_factory import RequestFactory
 
 
 class Client:
-    __base_url = 'https://api.spacetraders.io'
-
     def __init__(
         self,
         request_factory: RequestFactory,
     ):
-        self.request_factory = request_factory
+        self.__request_factory = request_factory
 
-    @property
-    def base_url(self):
-        return self.__base_url
-
-    async def get_status(
-        self,
-    ) -> Dict[str, Union[int, str]]:
-        return await self.request_factory.generate(
-            method='get',
-            endpoint='/game/status'
+    # account
+    async def get_account_info(self):
+        """Get information on your account"""
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint='/my/account'
         )
 
+    # flight plans
+    async def get_flight_plan(self, flight_plan_id: str):
+        """Get info on an existing flight plan"""
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint=f'/my/flight-plans/{flight_plan_id}',
+        )
+
+    async def create_flight_plan(self, ship_id: str, destination: str):
+        """Submit a new flight plan"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/my/flight-plans',
+            params={
+                'shipId': ship_id,
+                'destination': destination,
+            }
+        )
+
+    # game
+    async def get_game_status(self):
+        """Use to determine whether the server is alive"""
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint='/game/status',
+        )
+
+    # leaderboard
+    async def get_leaderboard(self):
+        """Use to see the current net worth of the top players"""
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint='/game/leaderboard/net-worth',
+        )
+
+    # loans
+    async def get_loans(self):
+        """Get your loans"""
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint='/my/loans',
+        )
+
+    async def pay_loan(self, loan_id: str):
+        """Pay off your loan"""
+        return await self.__request_factory.generate(
+            method='PUT',
+            endpoint=f'/my/loans/{loan_id}',
+        )
+
+    async def take_loan(self, type: str):
+        """Take out a loan"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint='/my/loans',
+            params={'type': type},
+        )
+
+    # locations
+    async def get_location_info(self, location_symbol: str):
+        """Get your loans"""
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint=f'/locations/{location_symbol}',
+        )
+
+    async def get_location_market(self, location_symbol: str):
+        """Get info on a location's marketplace"""
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint=f'/locations/{location_symbol}/marketplace',
+        )
+
+    async def get_location_ships(self, location_symbol: str):
+        """Get the ships at a location"""
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint=f'/locations/{location_symbol}/ships',
+        )
+
+    # purchase orders
+    async def purchase(self, ship_id: str, good: str, quantity: int):
+        """Place a new purchase order"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint='/my/purchase-orders',
+            params={
+                'shipId': ship_id,
+                'good': good,
+                'quantity': quantity,
+            }
+        )
+
+    # sell orders
+    async def sell(self, ship_id: str, good: str, quantity: int):
+        """Place a new sell order"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint='/my/sell-orders',
+            params={
+                'shipId': ship_id,
+                'good': good,
+                'quantity': quantity,
+            }
+        )
+
+    # ships
+    async def buy_ship(self, location: str, type: str):
+        """Buy a new ship"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint='/my/ships',
+            params={
+                'location': location,
+                'type': type,
+            },
+        )
+
+    async def get_ship_info(self, ship_id: str):
+        """Get your ship info"""
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint=f'/my/ships/{ship_id}',
+        )
+
+    async def get_ship_info(self):
+        """Get your ships"""
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint='/my/ships',
+        )
+
+    async def jettison_cargo(self, ship_id: str, good: str, quantity: int):
+        """Jettison cargo"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/my/ships/{ship_id}/jettison',
+            params={
+                'shipId': ship_id,
+                'good': good,
+                'quantity': quantity,
+            }
+        )
+
+    async def scrap_ship(self, ship_id: str):
+        """Scrap your ship for credits"""
+        return await self.__request_factory.generate(
+            method='DELETE',
+            endpoint=f'/my/ships/{ship_id}',
+        )
+
+    async def transfer_cargo(self, from_ship_id: str, to_ship_id: str, good: str, quantity: int):
+        """Transfer cargo between ships"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/my/ships/{from_ship_id}/transfer',
+            params={
+                'toShipId': to_ship_id,
+                'good': good,
+                'quantity': quantity,
+            }
+        )
+
+
+    # old
     async def claim_username(
         self,
         username: str
     ) -> Dict[str, Union[int, str]]:
-        return await self.request_factory.generate(
-            method='post',
-            endpoint=f'/users/{username}/claim'
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/users/{username}/claim',
         )
 
     async def get_account_info(
         self
     ) -> Dict[str, Union[int, str]]:
-        return await self.request_factory.generate(
-            method='get',
-            endpoint=f'/my/account'
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint=f'/my/account',
         )
 
     async def get_loans(
         self
     ) -> Dict[str, Union[int, str]]:
-        return await self.request_factory.generate(
-            method='get',
-            endpoint=f'/types/loans'
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint=f'/types/loans',
         )
 
-    async def take_loan(
+    async def get_ships(
         self,
+        class_: Optional[str] = None,
+    ) -> Dict[str, Union[int, str]]:
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint='/systems/OE/ship-listings',
+            params={'class': class_} if class_ else {},
+        )
+
+    async def buy_ship(
+        self,
+        location: str,
         type: str,
     ) -> Dict[str, Union[int, str]]:
-        return await self.request_factory.generate(
-            method='post',
-            endpoint='/my/loans',
-            params={'type': type}
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint='/my/ships',
+            params={
+                'location': location,
+                'type': type,
+            },
+        )
+
+    async def buy_fuel(
+        self,
+        ship_id: str,
+        good: str,
+        quantity: int,
+    ) -> Dict[str, Union[int, str]]:
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint='/purchase-orders',
+            params={
+                'ship_id': ship_id,
+                'good': good,
+                'quantity': quantity,
+            },
         )
