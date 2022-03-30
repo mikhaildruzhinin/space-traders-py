@@ -15,7 +15,7 @@ class Client:
         self.__request_factory = request_factory
 
     # account
-    async def get_account_info(self):
+    async def get_account(self):
         """Get information on your account"""
         return await self.__request_factory.generate(
             method='GET',
@@ -38,7 +38,7 @@ class Client:
             params={
                 'shipId': ship_id,
                 'destination': destination,
-            }
+            },
         )
 
     # game
@@ -58,7 +58,7 @@ class Client:
         )
 
     # loans
-    async def get_loans(self):
+    async def get_user_loans(self):
         """Get your loans"""
         return await self.__request_factory.generate(
             method='GET',
@@ -78,11 +78,11 @@ class Client:
             method='POST',
             endpoint='/my/loans',
             params={'type': type},
-        )
+        ),
 
     # locations
-    async def get_location_info(self, location_symbol: str):
-        """Get your loans"""
+    async def get_location(self, location_symbol: str):
+        """Get info on a location"""
         return await self.__request_factory.generate(
             method='GET',
             endpoint=f'/locations/{location_symbol}',
@@ -112,7 +112,7 @@ class Client:
                 'shipId': ship_id,
                 'good': good,
                 'quantity': quantity,
-            }
+            },
         )
 
     # sell orders
@@ -125,7 +125,7 @@ class Client:
                 'shipId': ship_id,
                 'good': good,
                 'quantity': quantity,
-            }
+            },
         )
 
     # ships
@@ -140,14 +140,14 @@ class Client:
             },
         )
 
-    async def get_ship_info(self, ship_id: str):
+    async def get_user_ship(self, ship_id: str):
         """Get your ship info"""
         return await self.__request_factory.generate(
             method='GET',
             endpoint=f'/my/ships/{ship_id}',
         )
 
-    async def get_ship_info(self):
+    async def get_user_ships(self):
         """Get your ships"""
         return await self.__request_factory.generate(
             method='GET',
@@ -163,7 +163,7 @@ class Client:
                 'shipId': ship_id,
                 'good': good,
                 'quantity': quantity,
-            }
+            },
         )
 
     async def scrap_ship(self, ship_id: str):
@@ -182,72 +182,157 @@ class Client:
                 'toShipId': to_ship_id,
                 'good': good,
                 'quantity': quantity,
-            }
+            },
         )
 
-
-    # old
-    async def claim_username(
-        self,
-        username: str
-    ) -> Dict[str, Union[int, str]]:
+    # structures
+    async def create_structure(self, location: str, type: str):
+        """Create a new structure"""
         return await self.__request_factory.generate(
             method='POST',
-            endpoint=f'/users/{username}/claim',
-        )
-
-    async def get_account_info(
-        self
-    ) -> Dict[str, Union[int, str]]:
-        return await self.__request_factory.generate(
-            method='GET',
-            endpoint=f'/my/account',
-        )
-
-    async def get_loans(
-        self
-    ) -> Dict[str, Union[int, str]]:
-        return await self.__request_factory.generate(
-            method='GET',
-            endpoint=f'/types/loans',
-        )
-
-    async def get_ships(
-        self,
-        class_: Optional[str] = None,
-    ) -> Dict[str, Union[int, str]]:
-        return await self.__request_factory.generate(
-            method='GET',
-            endpoint='/systems/OE/ship-listings',
-            params={'class': class_} if class_ else {},
-        )
-
-    async def buy_ship(
-        self,
-        location: str,
-        type: str,
-    ) -> Dict[str, Union[int, str]]:
-        return await self.__request_factory.generate(
-            method='POST',
-            endpoint='/my/ships',
+            endpoint='/my/structures',
             params={
                 'location': location,
                 'type': type,
             },
         )
 
-    async def buy_fuel(
-        self,
-        ship_id: str,
-        good: str,
-        quantity: int,
-    ) -> Dict[str, Union[int, str]]:
+    async def deposit_to_user_structure(self, structure_id: str, ship_id: str, good: str, quantity: int):
+        """Deposit goods to a structure you own"""
         return await self.__request_factory.generate(
             method='POST',
-            endpoint='/purchase-orders',
+            endpoint=f'/my/structures/{structure_id}/deposit',
             params={
-                'ship_id': ship_id,
+                'shipId': ship_id,
                 'good': good,
                 'quantity': quantity,
             },
+        )
+
+    async def deposit_to_structure(self, structure_id: str, ship_id: str, good: str, quantity: int):
+        """Deposit goods to a structure"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/structures/{structure_id}/deposit',
+            params={
+                'shipId': ship_id,
+                'good': good,
+                'quantity': quantity,
+            },
+        )
+
+    async def get_structure(self, structure_id: str):
+        """See specific structure"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/structures/{structure_id}',
+        )
+
+    async def transfer_from_structure(self, structure_id: str, ship_id: str, good: str, quantity: int):
+        """Transfer goods from your structure to a ship"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/my/structures/{structure_id}/transfer',
+            params={
+                'shipId': ship_id,
+                'good': good,
+                'quantity': quantity,
+            },
+        )
+
+    async def get_user_structure(self, structure_id: str):
+        """Use to see a specific structure"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/my/structures/{structure_id}',
+        )
+
+    async def get_user_structures(self):
+        """Use to see all of your structures"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint='/my/structures',
+        )
+
+    # systems
+    async def get_available_ships(self, system: str):
+        """Get a list of all available ships in the system"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/systems/{system}/ship-listings',
+        )
+
+    async def get_flight_plans(self, system: str):
+        """Get all active flight plans in the system"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/systems/{system}/flight-plans',
+        )
+
+    async def get_docked_ships(self, system: str):
+        """Get info on a system's docked ships"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/systems/{system}/ships',
+        )
+
+    async def get_locations(self, system: str):
+        """Get location info for a system"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/systems/{system}/locations',
+        )
+
+    async def get_system(self, system: str):
+        """Get systems info"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/systems/{system}',
+        )
+
+    # types
+    async def get_goods(self):
+        """Get available goods"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint='/types/goods',
+        )
+
+    async def get_loans(self):
+        """Get available loans"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint='/types/loans',
+        )
+
+    async def get_structures(self):
+        """Get available structures"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint='/types/structures',
+        )
+
+    async def get_ships(self, class_: Optional[str] = None):
+        """Get info on available ships"""
+        return await self.__request_factory.generate(
+            method='GET',
+            endpoint='/types/ships',
+            params={'class': class_} if class_ else {},
+        )
+
+    # user
+    async def claim_username(self, username: str):
+        """Claim a username and get a token"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/users/{username}/claim',
+        )
+
+    # warp jump
+    async def warp_jump(self, ship_id: str):
+        """Claim a username and get a token"""
+        return await self.__request_factory.generate(
+            method='POST',
+            endpoint=f'/my/warp-jumps',
+            params={'shipId': ship_id},
         )
