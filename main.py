@@ -1,36 +1,47 @@
+import argparse
 import asyncio
 import platform
-from time import time
+from typing import Optional
 
-import aiohttp
+from space_traders.launcher.launcher import Launcher
 
-from space_traders.clients.game import GameClient
-from space_traders.clients.user import UserClient
-from space_traders.config import BASE_URL
+parser = argparse.ArgumentParser()
 
+parser.add_argument(
+    '--username',
+    '-u',
+    dest='username',
+    action='store',
+    type=str,
+    help='username'
+)
+parser.add_argument(
+    '--signup',
+    '-s',
+    dest='sign_up',
+    action='store_true',
+    help='generate token for a new user and exit'
+)
 
-async def main():
-    # temporary session to create a new user
-    async with aiohttp.ClientSession(base_url=BASE_URL) as session:
-        client = UserClient(session)
-
-        username = f'user{int(time())}'
-        token = (await client.claim_username(username)).get('response', {}).get('token')
-
-    headers = {
-        'Authorization': f'Bearer {token}'
-    }
-
-    async with aiohttp.ClientSession(base_url=BASE_URL, headers=headers) as session:
-        client = GameClient(session)
-
-        r = await client.get_game_status()
-        print(r)
+args = parser.parse_args()
 
 
-if __name__ == '__main__':
+def main(sign_up: bool, username: Optional[str] = None):
     if platform.system() == 'Windows':
         asyncio.set_event_loop_policy(
             asyncio.WindowsSelectorEventLoopPolicy()
         )
-    asyncio.run(main())
+
+    asyncio.run(
+        Launcher(
+            username=username,
+            sign_up=sign_up,
+        ).launch()
+    )
+
+
+if __name__ == '__main__':
+    main(
+        username=args.username,
+        sign_up=args.sign_up,
+    )
